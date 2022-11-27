@@ -39,7 +39,7 @@ services:
       DB_HOST: host.docker.internal
       DB_PORT: 5432
       QUEUE_HOST: host.docker.internal
-      QUEUE_PORT: 15672
+      QUEUE_PORT: 5672
       QUEUE_USER: guest
       QUEUE_PASSWORD: guest
       QUEUE_NAME: cat-dog-queue
