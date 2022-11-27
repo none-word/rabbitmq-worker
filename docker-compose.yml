@@ -1,0 +1,63 @@
+version: "3"
+
+services:
+  rabbit:
+    container_name: rabbitmq
+    image: rabbitmq:3.9-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+  producer:
+    container_name: producer
+    image: noneword/producer-rabbitmq
+    environment:
+      QUEUE_HOST: host.docker.internal
+      QUEUE_PORT: 5672
+      QUEUE_USER: guest
+      QUEUE_PASSWORD: guest
+      QUEUE_NAME: cat-dog-queue
+    ports:
+      - "4501:4501"
+    depends_on:
+      - rabbit
+    restart: on-failure
+  consumer:
+    container_name: consumer
+    image: noneword/consumer-rabbitmq
+    environment:
+      DB_PASSWORD: password
+      DB_USER: postgres
+      DB_NAME: animal
+      DB_HOST: host.docker.internal
+      DB_PORT: 5432
+      QUEUE_HOST: host.docker.internal
+      QUEUE_PORT: 15672
+      QUEUE_USER: guest
+      QUEUE_PASSWORD: guest
+      QUEUE_NAME: cat-dog-queue
+    ports:
+      - "4502:4502"
+    depends_on:
+      - rabbit
+      - postgres
+      - producer
+    restart: on-failure
+  postgres:
+    container_name: postgres
+    image: postgres:alpine
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_DB: animal
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data

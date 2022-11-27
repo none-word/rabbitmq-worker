@@ -1,6 +1,9 @@
 package com.example.consumer.service.queue;
 
-import com.example.consumer.model.Animal;
+import com.example.consumer.model.Cat;
+import com.example.consumer.model.Dog;
+import com.example.consumer.service.implementation.CatService;
+import com.example.consumer.service.implementation.DogService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -14,14 +17,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class QueueReceiver {
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final CatService catService;
+    private final DogService dogService;
 
     @RabbitListener(queues = {"${queue.name}"})
     public void receiveMessage(@Payload String message) {
         log.info("Message has been received successfully. Message content: {}", message);
         try {
-            Animal animal = objectMapper.readValue(message, Animal.class);
+            Cat cat = objectMapper.readValue(message, Cat.class);
+            catService.saveAnimal(cat);
         } catch (JsonProcessingException e) {
-            log.info("Initialized message");
+            try {
+                Dog dog = objectMapper.readValue(message, Dog.class);
+                dogService.saveAnimal(dog);
+            } catch (JsonProcessingException ex) {
+                log.info("Initialized message");
+            }
         }
     }
 }

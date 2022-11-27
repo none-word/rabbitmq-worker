@@ -1,19 +1,19 @@
 package com.example.consumer.service.implementation;
 
-import com.example.consumer.model.Animal;
 import com.example.consumer.model.Dog;
 import com.example.consumer.repository.DogRepository;
-import com.example.consumer.service.AnimalService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
+@Slf4j
 @Service
-public class DogService implements AnimalService {
+public class DogService {
     private final DogRepository dogRepository;
 
-    @Override
-    public void saveAnimal(Animal animal) {
-        dogRepository.save((Dog) animal);
+    public void saveAnimal(Dog dog) {
+        log.info("Saving dog");
+        dogRepository.save(dog);
     }
 }
